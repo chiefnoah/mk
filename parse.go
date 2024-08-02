@@ -5,8 +5,8 @@ package main
 
 import (
 	"fmt"
-	"io/ioutil"
 	"os"
+	"io"
 	"path/filepath"
 	"regexp"
 	"strings"
@@ -159,7 +159,7 @@ func parseRedirInclude(p *parser, t token) parserStateFun {
 		if err != nil {
 			p.basicErrorAtToken(fmt.Sprintf("cannot open %s", filename), p.tokenbuf[0])
 		}
-		input, _ := ioutil.ReadAll(file)
+		input, _ := io.ReadAll(file)
 
 		path, err := filepath.Abs(filename)
 		if err != nil {

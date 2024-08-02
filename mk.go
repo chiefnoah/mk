@@ -4,7 +4,7 @@ import (
 	"bufio"
 	"flag"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"os"
 	"path/filepath"
 	"strings"
@@ -92,7 +92,6 @@ const (
 )
 
 // Build a node's prereqs. Block until completed.
-//
 func mkNodePrereqs(g *graph, u *node, e *edge, prereqs []*node, dryrun bool,
 	required bool) nodeStatus {
 	prereqstat := make(chan nodeStatus)
@@ -130,11 +129,11 @@ func mkNodePrereqs(g *graph, u *node, e *edge, prereqs []*node, dryrun bool,
 // concurrently.
 //
 // Args:
-//  g: Graph in which the node lives.
-//  u: Node to (possibly) build.
-//  dryrun: Don't actually build anything, just pretend.
-//  required: Avoid building this node, unless its prereqs are out of date.
 //
+//	g: Graph in which the node lives.
+//	u: Node to (possibly) build.
+//	dryrun: Don't actually build anything, just pretend.
+//	required: Avoid building this node, unless its prereqs are out of date.
 func mkNode(g *graph, u *node, dryrun bool, required bool) {
 	// try to claim on this node
 	u.mutex.Lock()
@@ -320,7 +319,7 @@ func main() {
 	if err != nil {
 		mkError("no mkfile found")
 	}
-	input, _ := ioutil.ReadAll(mkfile)
+	input, _ := io.ReadAll(mkfile)
 	mkfile.Close()
 
 	abspath, err := filepath.Abs(mkfilepath)
@@ -362,7 +361,7 @@ func main() {
 
 	// Create a dummy virtual rule that depends on every target
 	root := rule{}
-	root.targets = []pattern{pattern{false, "", nil}}
+	root.targets = []pattern{{false, "", nil}}
 	root.attributes = attribSet{false, false, false, false, false, false, false, true, false}
 	root.prereqs = targets
 	rs.add(root)
