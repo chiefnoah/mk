@@ -167,8 +167,9 @@ func parseRedirInclude(p *parser, t token) parserStateFun {
 		file, err := os.Open(filename)
 		if err != nil && errors.Is(err, os.ErrNotExist) {
 			p.basicWarningAtToken(fmt.Sprintf("< included file %s does not exist", filename), p.tokenbuf[0])
-			// TODO: consume as if this was done, but only warn and continue
-			return parseRedirInclude
+			// Exit
+			p.clear()
+			return parseTopLevel
 		} else if err != nil {
 			p.basicErrorAtToken(fmt.Sprintf("cannot open %s", filename), p.tokenbuf[0])
 		}
