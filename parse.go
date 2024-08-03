@@ -4,9 +4,10 @@
 package main
 
 import (
+	"errors"
 	"fmt"
-	"os"
 	"io"
+	"os"
 	"path/filepath"
 	"regexp"
 	"strings"
@@ -35,6 +36,14 @@ func (p *parser) basicErrorAtToken(what string, found token) {
 
 func (p *parser) basicErrorAtLine(what string, line int) {
 	mkError(fmt.Sprintf("%s:%d: syntax error: %s\n", p.name, line, what))
+}
+
+func (p *parser) basicWarningAtLine(what string, line int) {
+	mkWarn(fmt.Sprintf("%s:%d: syntax error: %s\n", p.name, line, what))
+}
+
+func (p *parser) basicWarningAtToken(what string, found token) {
+	p.basicWarningAtLine(what, found.line)
 }
 
 // Accept a token for use in the current statement being parsed.
@@ -156,7 +165,11 @@ func parseRedirInclude(p *parser, t token) parserStateFun {
 			filename += p.tokenbuf[i].val
 		}
 		file, err := os.Open(filename)
-		if err != nil {
+		if err != nil && errors.Is(err, os.ErrNotExist) {
+			p.basicWarningAtToken(fmt.Sprintf("< included file %s does not exist", filename), p.tokenbuf[0])
+			// TODO: consume as if this was done, but only warn and continue
+			return parseRedirInclude
+		} else if err != nil {
 			p.basicErrorAtToken(fmt.Sprintf("cannot open %s", filename), p.tokenbuf[0])
 		}
 		input, _ := io.ReadAll(file)

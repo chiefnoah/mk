@@ -244,9 +244,23 @@ func mkError(msg string) {
 	os.Exit(1)
 }
 
+func mkWarn(msg string) {
+	mkPrintWarn(msg)
+}
+
 func mkPrintError(msg string) {
 	if !nocolor {
 		os.Stderr.WriteString(ansiTermRed)
+	}
+	fmt.Fprintf(os.Stderr, "%s\n", msg)
+	if !nocolor {
+		os.Stderr.WriteString(ansiTermDefault)
+	}
+}
+
+func mkPrintWarn(msg string) {
+	if !nocolor {
+		os.Stderr.WriteString(ansiTermYellow)
 	}
 	fmt.Fprintf(os.Stderr, "%s\n", msg)
 	if !nocolor {

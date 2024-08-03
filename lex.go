@@ -333,8 +333,13 @@ func lexDoubleQuotedWord(l *lexer) lexerStateFun {
 
 func lexBackQuotedWord(l *lexer) lexerStateFun {
 	l.next() // '`'
-	l.acceptUntil("`")
-	l.next() // '`'
+	if l.peek() == '{' {
+		l.next() // '{'
+		l.acceptUntil("}")
+	} else {
+		l.acceptUntil("`")
+	}
+	l.next() // '`' | '}'
 	return lexBareWord
 }
 
